@@ -93,7 +93,8 @@ std::vector<SDL_Point> Snake::GetAllOccupiedCells() const {
 
 bool Snake::InCollision(const std::vector<Snake> &snakes) const {
   // get all cells of this snake
-  const auto this_snake_cells = this->GetAllOccupiedCells();
+  const auto this_snake_head =
+      SDL_Point{static_cast<int>(head_x), static_cast<int>(head_y)};
   // iterate over all other snakes
   for (const auto &snake : snakes) {
     // skip this snake
@@ -102,15 +103,27 @@ bool Snake::InCollision(const std::vector<Snake> &snakes) const {
     }
     const auto other_snake_cells = snake.GetAllOccupiedCells();
     // check if they overlap somewhere
-    for (std::size_t i = 0;
-         i < std::min(this_snake_cells.size(), other_snake_cells.size()); ++i) {
-      const auto this_snake_pt = this_snake_cells.at(i);
+    for (std::size_t i = 0; i < other_snake_cells.size(); ++i) {
       const auto other_snake_pt = other_snake_cells.at(i);
-      if (this_snake_pt.x == other_snake_pt.x &&
-          this_snake_pt.y == other_snake_pt.y) {
+      if (this_snake_head == other_snake_pt) {
         return true; // overlap found, collision detected
       }
     }
   }
   return false; // no overlap found with other snakes
+}
+
+bool Snake::InCollision(const std::vector<SDL_Point> &obstacles) const {
+  // get all cells of this snake
+  const auto this_snake_cells = this->GetAllOccupiedCells();
+  // iterate over obstacles
+  for (const auto &obstacle : obstacles) {
+    // iterate over snake cells
+    for (const auto &pt : this_snake_cells) {
+      if (pt == obstacle) {
+        return true; // snake hit obstacle
+      }
+    }
+  }
+  return false; // no obstacle hit
 }

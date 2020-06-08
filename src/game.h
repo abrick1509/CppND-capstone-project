@@ -22,13 +22,14 @@ public:
 private:
   std::vector<Snake> snakes;
   SDL_Point food;
+  std::vector<SDL_Point> obstacles;
+  std::vector<SDL_Point> free_space;
 
   std::random_device dev;
   std::mt19937 engine;
-  std::uniform_int_distribution<int> random_w;
-  std::uniform_int_distribution<int> random_h;
 
   void PlaceFood();
+  void AddObstacle();
   void Update(bool &running);
 };
 

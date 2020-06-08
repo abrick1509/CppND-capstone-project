@@ -6,6 +6,10 @@
 #include <iostream>
 #include <vector>
 
+inline bool operator==(const SDL_Point &lhs, const SDL_Point &rhs) {
+  return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
 class Snake {
 public:
   enum class Direction { kUp, kDown, kLeft, kRight };
@@ -23,6 +27,7 @@ public:
   bool SnakeCell(int x, int y) const;
   std::vector<SDL_Point> GetAllOccupiedCells() const;
   bool InCollision(const std::vector<Snake> &snakes) const;
+  bool InCollision(const std::vector<SDL_Point> &obstacles) const;
   void IncreaseScore() { score++; }
   int GetScore() const { return score; }
   std::size_t GetSize() const { return body.size(); }

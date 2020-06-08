@@ -6,11 +6,17 @@
 
 Game::Game(std::size_t grid_width, std::size_t grid_height,
            const std::size_t number_of_players)
-    : engine(dev()), random_w(0, static_cast<int>(grid_width)),
-      random_h(0, static_cast<int>(grid_height)) {
+    : engine(dev()) {
   snakes.reserve(number_of_players);
   for (std::size_t i = 0; i < number_of_players; ++i) {
     snakes.emplace_back(grid_width, grid_height, i, number_of_players);
+  }
+  // in the beginning whole grid is free to navigate
+  free_space.reserve(grid_width * grid_height);
+  for (std::size_t col = 0; col < grid_width; ++col) {
+    for (std::size_t row = 0; row < grid_height; ++row) {
+      free_space.push_back({static_cast<int>(col), static_cast<int>(row)});
+    }
   }
   PlaceFood();
 }
@@ -30,7 +36,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snakes);
     Update(running);
-    renderer.Render(snakes, food);
+    renderer.Render(snakes, food, obstacles);
 
     frame_end = SDL_GetTicks();
 
@@ -41,7 +47,6 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
     // After every second, update the window title.
     if (frame_end - title_timestamp >= 1000) {
-
       renderer.UpdateWindowTitle(snakes, frame_count);
       frame_count = 0;
       title_timestamp = frame_end;
@@ -57,25 +62,57 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 }
 
 void Game::PlaceFood() {
-  int x, y;
+  if (free_space.empty()) {
+    return;
+  }
+  // get random index in free space
+  std::uniform_int_distribution<std::size_t> random_idx(0, free_space.size());
   while (true) {
-    x = random_w(engine);
-    y = random_h(engine);
+    const auto idx = random_idx(engine);
+    const auto free_pt = free_space.at(idx);
     // Check that the location is not occupied by a snake item before placing
     // food.
-    for (const auto &snake : snakes) {
-      if (!snake.SnakeCell(x, y)) {
-        food.x = x;
-        food.y = y;
-        return;
-      }
+    const auto occupied_by_snake =
+        std::any_of(snakes.begin(), snakes.end(), [&](const auto &snake) {
+          return snake.SnakeCell(free_pt.x, free_pt.y);
+        });
+    if (!occupied_by_snake) {
+      food.x = free_pt.x;
+      food.y = free_pt.y;
+      free_space.erase(free_space.begin() + idx);
+      return;
+    }
+  }
+}
+
+void Game::AddObstacle() {
+  if (free_space.empty()) {
+    return;
+  }
+  // get random index in free space
+  std::uniform_int_distribution<std::size_t> random_idx(0, free_space.size());
+  while (true) {
+    const auto idx = random_idx(engine);
+    const auto free_pt = free_space.at(idx);
+    // Check that the location is not occupied by a snake item before placing
+    // food.
+    const auto occupied_by_snake =
+        std::any_of(snakes.begin(), snakes.end(), [&](const auto &snake) {
+          return snake.SnakeCell(free_pt.x, free_pt.y);
+        });
+    const auto occupied_by_food = free_pt == food;
+    if (!occupied_by_snake && !occupied_by_food) {
+      obstacles.push_back(free_pt);
+      free_space.erase(free_space.begin() + idx);
+      return;
     }
   }
 }
 
 void Game::Update(bool &running) {
   const auto any_snake_dead =
-      std::any_of(snakes.begin(), snakes.end(),
+      std::any_of(snakes.begin(), //
+                  snakes.end(),   //
                   [](const Snake &snake) { return !snake.alive; });
   if (any_snake_dead) {
     running = false;
@@ -85,7 +122,7 @@ void Game::Update(bool &running) {
   for (auto &snake : snakes) {
     snake.Update();
     // check if this snake has moved into one of the other snakes
-    if (snake.InCollision(snakes)) {
+    if (snake.InCollision(snakes) || snake.InCollision(obstacles)) {
       snake.alive = false;
       running = false;
       return;
@@ -101,6 +138,8 @@ void Game::Update(bool &running) {
       snake.GrowBody();
       snake.speed += 0.02;
       PlaceFood();
+      // Add obstacles if food was found
+      AddObstacle();
     }
   }
 }

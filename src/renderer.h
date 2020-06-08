@@ -11,7 +11,8 @@ public:
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
 
-  void Render(const std::vector<Snake> &snakes, SDL_Point const &food);
+  void Render(const std::vector<Snake> &snakes, SDL_Point const &food,
+              const std::vector<SDL_Point> &obstalces);
   void UpdateWindowTitle(const std::vector<Snake> &snakes, int fps);
 
 private:
