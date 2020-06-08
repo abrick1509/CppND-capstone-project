@@ -1,7 +1,7 @@
-#include <iostream>
 #include "controller.h"
 #include "game.h"
 #include "renderer.h"
+#include <iostream>
 
 int main() {
   constexpr std::size_t kFramesPerSecond{60};
@@ -10,13 +10,25 @@ int main() {
   constexpr std::size_t kScreenHeight{640};
   constexpr std::size_t kGridWidth{32};
   constexpr std::size_t kGridHeight{32};
+  constexpr std::size_t kNumberOfPlayers{2};
 
-  Renderer renderer(kScreenWidth, kScreenHeight, kGridWidth, kGridHeight);
+  Renderer renderer(kScreenWidth,  //
+                    kScreenHeight, //
+                    kGridWidth,    //
+                    kGridHeight);
+
   Controller controller;
-  Game game(kGridWidth, kGridHeight);
+  Game game(kGridWidth,  //
+            kGridHeight, //
+            kNumberOfPlayers);
   game.Run(controller, renderer, kMsPerFrame);
   std::cout << "Game has terminated successfully!\n";
-  std::cout << "Score: " << game.GetScore() << "\n";
-  std::cout << "Size: " << game.GetSize() << "\n";
+  std::cout << "Number of Players: " << game.GetNumberOfPlayers() << "\n";
+  for (std::size_t i = 0; i < game.GetNumberOfPlayers(); ++i) {
+    const auto this_snake = game.GetSnake(i);
+    std::cout << "Player " << i << ":\n";
+    std::cout << "\tScore: \t\t" << this_snake.GetScore() << std::endl;
+    std::cout << "\tSnake size: \t" << this_snake.GetSize() << std::endl;
+  }
   return 0;
 }
