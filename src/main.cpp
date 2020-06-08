@@ -29,6 +29,7 @@ int main() {
     std::cout << "Player " << i << ":\n";
     std::cout << "\tScore: \t\t" << this_snake.GetScore() << std::endl;
     std::cout << "\tSnake size: \t" << this_snake.GetSize() << std::endl;
+    std::cout << "\tSnake alive: \t" << this_snake.alive << std::endl;
   }
   return 0;
 }

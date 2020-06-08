@@ -78,3 +78,39 @@ bool Snake::SnakeCell(int x, int y) const {
   }
   return false;
 }
+
+std::vector<SDL_Point> Snake::GetAllOccupiedCells() const {
+  std::vector<SDL_Point> result;
+  result.reserve(body.size() + 1);
+  // add head
+  result.push_back({static_cast<int>(head_x), static_cast<int>(head_y)});
+  // add body
+  for (const auto &pt : body) {
+    result.push_back({pt.x, pt.y});
+  }
+  return result; // NRVO
+}
+
+bool Snake::InCollision(const std::vector<Snake> &snakes) const {
+  // get all cells of this snake
+  const auto this_snake_cells = this->GetAllOccupiedCells();
+  // iterate over all other snakes
+  for (const auto &snake : snakes) {
+    // skip this snake
+    if (&snake == this) {
+      continue;
+    }
+    const auto other_snake_cells = snake.GetAllOccupiedCells();
+    // check if they overlap somewhere
+    for (std::size_t i = 0;
+         i < std::min(this_snake_cells.size(), other_snake_cells.size()); ++i) {
+      const auto this_snake_pt = this_snake_cells.at(i);
+      const auto other_snake_pt = other_snake_cells.at(i);
+      if (this_snake_pt.x == other_snake_pt.x &&
+          this_snake_pt.y == other_snake_pt.y) {
+        return true; // overlap found, collision detected
+      }
+    }
+  }
+  return false; // no overlap found with other snakes
+}

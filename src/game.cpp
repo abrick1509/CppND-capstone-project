@@ -84,6 +84,12 @@ void Game::Update(bool &running) {
 
   for (auto &snake : snakes) {
     snake.Update();
+    // check if this snake has moved into one of the other snakes
+    if (snake.InCollision(snakes)) {
+      snake.alive = false;
+      running = false;
+      return;
+    }
 
     int new_x = static_cast<int>(snake.head_x);
     int new_y = static_cast<int>(snake.head_y);
