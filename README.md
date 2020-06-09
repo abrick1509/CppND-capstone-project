@@ -35,11 +35,11 @@ It was extended by the following features:
 
 ## File/Class Structure
 
-The file structure of the original repo has been mainly contained. Adaptions to the ```snake.h/snake.cpp```, ```controller.h/controller.cpp```, ```game.h/game.cpp``` and ```renderer.h/renderer.cpp``` have been made in order to support multiple players. In addition free functions in ```prompt.h/prompt.cpp``` have been provided in order to handle user interaction. 
+The file structure of the original repo has been mainly contained. Adaptions to the ```snake.h/snake.cpp```, ```controller.h/controller.cpp```, ```game.h/game.cpp``` and ```renderer.h/renderer.cpp``` have been made in order to support multiple players. In addition free functions in ```prompt.h/prompt.cpp``` have been provided in order to handle user interaction. Also ```logger.h``` provides a basic file logger, that shields the end user from internal file handling/opening/closing.
 
 
 ## Expected Behavior/Output
-When starting the game, the player(s) are asked to the number of players. This is currently limited to 2 players, but could easily be extended. When cancelling, the game will quit without any errors or exceptions. Once the number of players is chosen, player(s) will be able to play the snake game. First player controls by arrow keys, second player controls by W/A/S/D. Every time a food object is eaten by one of the snakes, the game's speed is increased and an obstacle is placed. Hitting another snake or an obstacle will end the game. Finally, a prompt is shown indicating the winner of the game. The console prints additional input about the general game score for all players.
+When starting the game, the player(s) are asked to the number of players. This is currently limited to 2 players, but could easily be extended. When cancelling, the game will quit without any errors or exceptions. Once the number of players is chosen, player(s) will be able to play the snake game. First player controls by arrow keys, second player controls by W/A/S/D. Every time a food object is eaten by one of the snakes, the game's speed is increased and an obstacle is placed. Hitting another snake or an obstacle will end the game. Finally, a prompt is shown indicating the winner of the game. The console prints additional input about the general game score for all players. Also a uniquely named log file (e.g. 1591707284_log.txt) logs additional game internal information to a file (e.g. movements, newly placed food/obstacles, etc.).
 
 ## Rubic Points Addressed
 
@@ -53,15 +53,20 @@ The following functions use a variety of control structures (loops, STL algorith
 - ```snake.cpp::GetAllOccupiedCells::82```
 - ```snake.cpp::InCollision::94```
 
-**2. The project accepts user input and processes the input.**
+**2. The project reads data from a file and process the data, or the program writes data to a file.**
 
-The following functions are querying and processing user input>
+The following files are writing data to a file:
+- ```logger.h::LogMessage::31```
+
+**3. The project accepts user input and processes the input.**
+
+The following functions are querying and processing user input:
 - ```prompt.cpp::QueryForNumberOfPlayers::10```
 - ```prompt.cpp:ShowFinalScore::66```
 
 ### Object Oriented Programming
 
-**3. The project uses Object Oriented Programming techniques..**
+**4. The project uses Object Oriented Programming techniques.**
 
 The following members/functions have been extended with additional attributes and methods:
 - ```game.h::snakes::23```
@@ -69,8 +74,18 @@ The following members/functions have been extended with additional attributes an
 - ```game.h::free_space::26```
 - ```snake.h::GetAllOccupiedCells::28```
 - ```snake.h::InCollision::29&30```
+- ```logger.h```
 
-**4. Classes abstract implementation details from their interfaces.**
+**5. Classes use appropriate access specifiers for class members.**
+
+All classes are defining members explicitly as private, protected or public. If required appropriate getters/setters are implemented. This applies to all files in the project.
+
+**6. Classes encapsulate behavior.**
+
+The ```Logger``` class implements a basic file logger, that hides the internal file handling from the end user.
+- ```logger.h```
+
+**7. Classes abstract implementation details from their interfaces.**
 
 The following member functions are abstracting implementations from their interfaces:
 - ```game.cpp::AddObstacle::88```
@@ -78,19 +93,37 @@ The following member functions are abstracting implementations from their interf
 - ```game.cpp::Update::112```
 - ```snake.cpp::GetAllOccupiedCells::82```
 - ```snake.cpp::InCollision::94```
+- ```logger.h```
 
-**5. Overloaded functions allow the same function to operate on different parameters.**
+**8. Overloaded functions allow the same function to operate on different parameters.**
 
 The following functions are overloading with different signatures:
 - ```snake.h::InCollision::29&30```
 
 ### Memory Management
 
-**6. The project makes use of references in function declarations.**
+**9. The project makes use of references in function declarations.**
 
 The following functions use pass-by-reference:
-- ```game.h::Update()::33```
+- ```game.h::Update::33```
 - ```snake.h::InCollision::29&30```
-- ```prompt.h::QueryForNumbersOfPlayers()::9```
+- ```prompt.h::QueryForNumbersOfPlayers::9```
 - ```prompt.h::ShowFinalScore::11```
+- ```logger.h::LogMessage::31```
 
+**10. The project follows the Rule of 5.**
+
+The ```Logger``` class follows the Rule of 5 by defining/deleting all required constructors.
+- ```logger.h```
+
+
+**11. The project uses move semantics to move data, instead of copying it, where possible.**
+The ```Logger``` class uses move semantics in order to move the ```ofstream``` of a file.
+- ```logger.h```
+
+### Concurrency
+
+**12. A mutex or lock is used in the project.**
+
+With regard to a possible multithreaded extension of this program, the logger object protects its filestream by a ```std::mutex```.
+- ```logger.h::32```
