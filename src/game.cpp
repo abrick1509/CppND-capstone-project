@@ -136,7 +136,9 @@ void Game::Update(bool &running) {
       snake.IncreaseScore();
       // Grow snake and increase speed.
       snake.GrowBody();
-      snake.speed += 0.02;
+      for (auto &snake : snakes) {
+        snake.speed += 0.02;
+      }
       PlaceFood();
       // Add obstacles if food was found
       AddObstacle();
