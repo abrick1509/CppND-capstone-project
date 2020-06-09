@@ -3,6 +3,7 @@
 
 #include "SDL.h"
 #include "controller.h"
+#include "logger.h"
 #include "renderer.h"
 #include "snake.h"
 #include <random>
@@ -11,9 +12,9 @@
 class Game {
 public:
   Game(std::size_t grid_width, std::size_t grid_height,
-       const std::size_t number_of_players);
+       const std::size_t number_of_players, Logger &logger);
   void Run(Controller const &controller, Renderer &renderer,
-           std::size_t target_frame_duration);
+           const std::size_t target_frame_duration, Logger &logger);
   int GetScore() const;
   int GetSize() const;
   std::size_t GetNumberOfPlayers() { return snakes.size(); }
@@ -28,9 +29,9 @@ private:
   std::random_device dev;
   std::mt19937 engine;
 
-  void PlaceFood();
-  void AddObstacle();
-  void Update(bool &running);
+  void PlaceFood(Logger &logger);
+  void AddObstacle(Logger &logger);
+  void Update(bool &running, Logger &logger);
 };
 
 #endif

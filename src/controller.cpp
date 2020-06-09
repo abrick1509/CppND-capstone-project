@@ -1,17 +1,21 @@
 #include "controller.h"
 #include "SDL.h"
 #include "SDL_keycode.h"
+#include "logger.h"
 #include "snake.h"
 #include <iostream>
 
-void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
+bool Controller::ChangeDirection(Snake &snake, Snake::Direction input,
                                  Snake::Direction opposite) const {
-  if (snake.direction != opposite || snake.size == 1)
+  if (snake.direction != opposite || snake.size == 1) {
     snake.direction = input;
-  return;
+    return true;
+  }
+  return false;
 }
 
-void Controller::HandleInput(bool &running, std::vector<Snake> &snakes) const {
+void Controller::HandleInput(Logger &logger, bool &running,
+                             std::vector<Snake> &snakes) const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
@@ -20,21 +24,31 @@ void Controller::HandleInput(bool &running, std::vector<Snake> &snakes) const {
       auto &snake = snakes.at(0);
       switch (e.key.keysym.sym) {
       case SDLK_UP:
-        ChangeDirection(snake, Snake::Direction::kUp, Snake::Direction::kDown);
+        if (ChangeDirection(snake, Snake::Direction::kUp,
+                            Snake::Direction::kDown)) {
+          logger.LogMessage("Snake 1 change direction to UP");
+        }
         break;
 
       case SDLK_DOWN:
-        ChangeDirection(snake, Snake::Direction::kDown, Snake::Direction::kUp);
+        if (ChangeDirection(snake, Snake::Direction::kDown,
+                            Snake::Direction::kUp)) {
+          logger.LogMessage("Snake 1 change direction to DOWN");
+        }
         break;
 
       case SDLK_LEFT:
-        ChangeDirection(snake, Snake::Direction::kLeft,
-                        Snake::Direction::kRight);
+        if (ChangeDirection(snake, Snake::Direction::kLeft,
+                            Snake::Direction::kRight)) {
+          logger.LogMessage("Snake 1 change direction to LEFT");
+        }
         break;
 
       case SDLK_RIGHT:
-        ChangeDirection(snake, Snake::Direction::kRight,
-                        Snake::Direction::kLeft);
+        if (ChangeDirection(snake, Snake::Direction::kRight,
+                            Snake::Direction::kLeft)) {
+          logger.LogMessage("Snake 1 change direction to RIGHT");
+        }
         break;
       }
       // check if second snake is available
@@ -42,23 +56,31 @@ void Controller::HandleInput(bool &running, std::vector<Snake> &snakes) const {
         auto &snake = snakes.at(1);
         switch (e.key.keysym.sym) {
         case SDLK_w:
-          ChangeDirection(snake, Snake::Direction::kUp,
-                          Snake::Direction::kDown);
+          if (ChangeDirection(snake, Snake::Direction::kUp,
+                              Snake::Direction::kDown)) {
+            logger.LogMessage("Snake 2 change direction to UP");
+          }
           break;
 
         case SDLK_s:
-          ChangeDirection(snake, Snake::Direction::kDown,
-                          Snake::Direction::kUp);
+          if (ChangeDirection(snake, Snake::Direction::kDown,
+                              Snake::Direction::kUp)) {
+            logger.LogMessage("Snake 1 change direction to DOWN");
+          }
           break;
 
         case SDLK_a:
-          ChangeDirection(snake, Snake::Direction::kLeft,
-                          Snake::Direction::kRight);
+          if (ChangeDirection(snake, Snake::Direction::kLeft,
+                              Snake::Direction::kRight)) {
+            logger.LogMessage("Snake 1 change direction to LEFT");
+          }
           break;
 
         case SDLK_d:
-          ChangeDirection(snake, Snake::Direction::kRight,
-                          Snake::Direction::kLeft);
+          if (ChangeDirection(snake, Snake::Direction::kRight,
+                              Snake::Direction::kLeft)) {
+            logger.LogMessage("Snake 1 change direction to RIGHT");
+          }
           break;
         }
       }

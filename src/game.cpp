@@ -3,9 +3,10 @@
 #include "SDL_version.h"
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height,
-           const std::size_t number_of_players)
+           const std::size_t number_of_players, Logger &logger)
     : engine(dev()) {
   snakes.reserve(number_of_players);
   for (std::size_t i = 0; i < number_of_players; ++i) {
@@ -18,11 +19,11 @@ Game::Game(std::size_t grid_width, std::size_t grid_height,
       free_space.push_back({static_cast<int>(col), static_cast<int>(row)});
     }
   }
-  PlaceFood();
+  PlaceFood(logger);
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
-               std::size_t target_frame_duration) {
+               const std::size_t target_frame_duration, Logger &logger) {
   Uint32 title_timestamp = SDL_GetTicks();
   Uint32 frame_start;
   Uint32 frame_end;
@@ -34,9 +35,13 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     frame_start = SDL_GetTicks();
 
     // Input, Update, Render - the main game loop.
-    controller.HandleInput(running, snakes);
-    Update(running);
-    renderer.Render(snakes, food, obstacles);
+    controller.HandleInput(logger,  //
+                           running, //
+                           snakes);
+    Update(running, logger);
+    renderer.Render(snakes, //
+                    food,   //
+                    obstacles);
 
     frame_end = SDL_GetTicks();
 
@@ -61,7 +66,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   }
 }
 
-void Game::PlaceFood() {
+void Game::PlaceFood(Logger &logger) {
   if (free_space.empty()) {
     return;
   }
@@ -80,12 +85,15 @@ void Game::PlaceFood() {
       food.x = free_pt.x;
       food.y = free_pt.y;
       free_space.erase(free_space.begin() + idx);
+      logger.LogMessage("New food item has been placed at: [" +
+                        std::to_string(food.x) + ", " + std::to_string(food.y) +
+                        "].");
       return;
     }
   }
 }
 
-void Game::AddObstacle() {
+void Game::AddObstacle(Logger &logger) {
   if (free_space.empty()) {
     return;
   }
@@ -104,12 +112,15 @@ void Game::AddObstacle() {
     if (!occupied_by_snake && !occupied_by_food) {
       obstacles.push_back(free_pt);
       free_space.erase(free_space.begin() + idx);
+      logger.LogMessage("New obstacle has been placed at: [" +
+                        std::to_string(free_pt.x) + ", " +
+                        std::to_string(free_pt.y) + "].");
       return;
     }
   }
 }
 
-void Game::Update(bool &running) {
+void Game::Update(bool &running, Logger &logger) {
   const auto any_snake_dead =
       std::any_of(snakes.begin(), //
                   snakes.end(),   //
@@ -119,10 +130,12 @@ void Game::Update(bool &running) {
     return;
   }
 
-  for (auto &snake : snakes) {
+  for (std::size_t i = 0; i < snakes.size(); ++i) {
+    auto &snake = snakes.at(i);
     snake.Update();
     // check if this snake has moved into one of the other snakes
     if (snake.InCollision(snakes) || snake.InCollision(obstacles)) {
+      logger.LogMessage("Snake " + std::to_string(i) + " collided.");
       snake.alive = false;
       running = false;
       return;
@@ -133,15 +146,17 @@ void Game::Update(bool &running) {
 
     // Check if there's food over here
     if (food.x == new_x && food.y == new_y) {
+      logger.LogMessage("Snake " + std::to_string(i) + " has eaten.");
       snake.IncreaseScore();
       // Grow snake and increase speed.
       snake.GrowBody();
       for (auto &snake : snakes) {
         snake.speed += 0.02;
       }
-      PlaceFood();
+      logger.LogMessage("Increased speed to " + std::to_string(snake.speed));
+      PlaceFood(logger);
       // Add obstacles if food was found
-      AddObstacle();
+      AddObstacle(logger);
     }
   }
 }

@@ -1,6 +1,7 @@
 #include "SDL_log.h"
 #include "controller.h"
 #include "game.h"
+#include "logger.h"
 #include "prompt.h"
 #include "renderer.h"
 #include <algorithm>
@@ -27,10 +28,12 @@ int main() {
     return -1;
   }
   Controller controller;
-  Game game(kGridWidth,  //
-            kGridHeight, //
-            kNumberOfPlayers);
-  game.Run(controller, renderer, kMsPerFrame);
+  Logger logger("log.txt");
+  Game game(kGridWidth,       //
+            kGridHeight,      //
+            kNumberOfPlayers, //
+            logger);
+  game.Run(controller, renderer, kMsPerFrame, logger);
   std::cout << "Game has terminated successfully!\n";
   std::cout << "Number of Players: " << game.GetNumberOfPlayers() << "\n";
   std::vector<std::pair<std::string, int>> scores;
