@@ -15,6 +15,8 @@ public:
               const std::vector<SDL_Point> &obstalces);
   void UpdateWindowTitle(const std::vector<Snake> &snakes, int fps);
 
+  SDL_Window *GetWindow() { return sdl_window; }
+
 private:
   SDL_Window *sdl_window;
   SDL_Renderer *sdl_renderer;

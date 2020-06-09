@@ -1,5 +1,7 @@
+#include "SDL_log.h"
 #include "controller.h"
 #include "game.h"
+#include "prompt.h"
 #include "renderer.h"
 #include <algorithm>
 #include <iostream>
@@ -12,13 +14,18 @@ int main() {
   constexpr std::size_t kScreenHeight{640};
   constexpr std::size_t kGridWidth{32};
   constexpr std::size_t kGridHeight{32};
-  constexpr std::size_t kNumberOfPlayers{2};
 
   Renderer renderer(kScreenWidth,  //
                     kScreenHeight, //
                     kGridWidth,    //
                     kGridHeight);
-
+  Prompt prompt;
+  int kNumberOfPlayers{1};
+  const auto success = prompt.Update(renderer.GetWindow(), kNumberOfPlayers);
+  if (!success) {
+    SDL_Log("Game will not be started, determining number of players failed.");
+    return -1;
+  }
   Controller controller;
   Game game(kGridWidth,  //
             kGridHeight, //
