@@ -19,9 +19,9 @@ int main() {
                     kScreenHeight, //
                     kGridWidth,    //
                     kGridHeight);
-  Prompt prompt;
   int kNumberOfPlayers{1};
-  const auto success = prompt.Update(renderer.GetWindow(), kNumberOfPlayers);
+  const auto success = QueryForNumberOfPlayers(renderer.GetWindow(), //
+                                               kNumberOfPlayers);
   if (!success) {
     SDL_Log("Game will not be started, determining number of players failed.");
     return -1;
@@ -51,6 +51,6 @@ int main() {
   const auto &winner = scores.back();
   std::cout << "The winner is: " << winner.first
             << ", with a score of: " << winner.second << std::endl;
-
+  ShowFinalScore(renderer.GetWindow(), winner);
   return 0;
 }

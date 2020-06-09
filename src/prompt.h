@@ -4,16 +4,11 @@
 #include "SDL.h"
 #include "SDL_messagebox.h"
 #include "SDL_video.h"
+#include <string>
 
-class Prompt {
-public:
-  Prompt();
+bool QueryForNumberOfPlayers(SDL_Window *parent_window, int &number_of_players);
 
-  bool Update(SDL_Window *parent_window, int &number_of_players);
-
-private:
-  SDL_MessageBoxData message_box;
-  SDL_MessageBoxButtonData buttons[4];
-};
+void ShowFinalScore(SDL_Window *parent_window,
+                    const std::pair<std::string, int> &winner);
 
 #endif
